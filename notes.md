@@ -4,6 +4,11 @@
   - [Hosted Environments](#hosted-environments)
   - [Bare Metal Environments](#bare-metal-environments)
   - [The libstd Runtime](#the-libstd-runtime)
+- [Tooling](#tooling)
+  - [cargo-binutils](#cargo-binutils)
+  - [qemu-system-arm](#qemu-system-arm)
+  - [GDB](#gdb)
+  - [OpenOCD](#openocd)
 
 ## 1.1 Hardware
 
@@ -42,3 +47,39 @@ Since `libcore` makes no assumptions about the system the program will run on, i
 
 `libstd` provides not only a common way for accessing OS abstractions, but also provides a runtime. The runtime handles certain tasks before spawning the main thread and invoking the program's main function, such as setting up stack overflow protection and processing command line arguments.
 
+## Tooling
+
+We'll have to leverage some tooling to develop on a different architecture, and to run and debug on a remote device:
+
+`cargo-binutils` - Cargo subcommands to invoke the LLVM tools shipped with the Rust toolchain.
+`qemu-system-arm` - A open source ARM emulator.
+`Open OCD (Open On Chip Debugger)` - A debugging interface for the on board debugging hardware.
+GDB with ARM support
+
+### cargo-binutils
+
+Includes the LLVM version so `objdump`, `nm`, and `size` and are used for inspecting binaries.
+
+`objdump` - dissassemble an executable into assembly language.
+
+`nm` - dumps the symbol table from a binary file. 
+
+`size` - list the section sizes and total size for provided binary files.
+
+The advantage of using the LLVM versions instead of the GNU binutils is that we can install them with one `rustup` command, and they support all the same architectures as rustc since they both share a backend.
+
+### qemu-system-arm
+
+Allows us to follow along even without the hardware!
+
+### GDB
+
+Since we can't always log to the host console. To use GDB to debug on the remote device, will use GDB's `load` command, which uploads the program to the target hardware. **Check this is true**
+
+### OpenOCD
+
+OpenOCD will act as a translator for GDB to interact with the `ST-Link` debugging hardware on the discovery board. 
+
+OpenOCD runs on the laptop and translates between GDB's TCP/IP based remote debug protocol and ST-LINK's USB based protocol.
+
+It also knows how to interact with the memory-mapped registers 
